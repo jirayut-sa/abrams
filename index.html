@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบจัดเก็บข้อมูลการอบรม</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/th.js"></script>
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+    
+    <style>
+        * {
+           font-family: 'Prompt', sans-serif;
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .btn-gradient {
+            background: linear-gradient(45deg, #ff6b6b, #feca57);
+            transition: all 0.3s ease;
+        }
+        .btn-gradient:hover {
+            background: linear-gradient(45deg, #ff5252, #ff9f43);
+            transform: translateY(-2px);
+        }
+        .btn-success-gradient {
+            background: linear-gradient(45deg, #48cae4, #023e8a);
+        }
+        .btn-success-gradient:hover {
+            background: linear-gradient(45deg, #0077b6, #001d3d);
+            transform: translateY(-2px);
+        }
+        .btn-info-gradient {
+            background: linear-gradient(45deg, #a8e6cf, #3d5a80);
+        }
+        .btn-info-gradient:hover {
+            background: linear-gradient(45deg, #88d8a3, #293241);
+            transform: translateY(-2px);
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .logo-shadow {
+            filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+        }
+        .image-preview {
+            max-width: 100px;
+            max-height: 100px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen">
+    <header class="gradient-bg text-white shadow-lg">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <div class="logo-shadow">
+                       <img src="https://i.postimg.cc/FKvMVwQz/image.png" alt="Logo" class="h-12 w-12 object-contain">
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold">ระบบจัดเก็บข้อมูลการอบรม</h1>
+                         <p class="text-sm opacity-90">สำหรับครู ผู้บริหาร และเจ้าหน้าที่</p>
+                    </div>
+                </div>
+                <div class="hidden md:flex space-x-4">
+                    <button onclick="showHome()" class="px-4 py-2 rounded-lg bg-white/20 hover:bg-white/30">
+                        <i class="fas fa-home mr-2"></i>หน้าแรก
+                    </button>
+                    <button onclick="showAddForm()" class="px-4 py-2 rounded-lg bg-white/20 hover:bg-white/30">
+                        <i class="fas fa-plus mr-2"></i>เพิ่มข้อมูล
+                    </button>
+                    <button onclick="showSearch()" class="px-4 py-2 rounded-lg bg-white/20 hover:bg-white/30">
+                        <i class="fas fa-search mr-2"></i>ค้นหา
+                    </button>
+                    <button onclick="showReport()" class="px-4 py-2 rounded-lg bg-white/20 hover:bg-white/30">
+                        <i class="fas fa-chart-bar mr-2"></i>รายงาน
+                    </button>
+                </div>
+                <button class="md:hidden text-white" onclick="toggleMobileMenu()">
+                    <i class="fas fa-bars text-2xl"></i>
+                </button>
+            </div>
+        </div>
+        
+        <div id="mobileMenu" class="hidden md:hidden bg-black/20 px-4 pb-4">
+            <div class="space-y-2">
+                <button onclick="showHome(); toggleMobileMenu()" class="w-full text-left px-4 py-2 rounded-lg bg-white/20 hover:bg-white/30">
+                    <i class="fas fa-home mr-2"></i>หน้าแรก
+                </button>
+                <button onclick="showAddForm(); toggleMobileMenu()" class="w-full text-left px-4 py-2 rounded-lg bg-white/20 hover:bg-white/30">
+                    <i class="fas fa-plus mr-2"></i>เพิ่มข้อมูล
+                </button>
+                <button onclick="showSearch(); toggleMobileMenu()" class="w-full text-left px-4 py-2 rounded-lg bg-white/20 hover:bg-white/30">
+                    <i class="fas fa-search mr-2"></i>ค้นหา
+                </button>
+                <button onclick="showReport(); toggleMobileMenu()" class="w-full text-left px-4 py-2 rounded-lg bg-white/20 hover:bg-white/30">
+                    <i class="fas fa-chart-bar mr-2"></i>รายงาน
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8">
+        <div id="homePage" class="hidden animate-fade-in">
+            <div class="text-center mb-8">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4">ยินดีต้อนรับสู่ระบบจัดเก็บข้อมูลการอบรม</h2>
+                <p class="text-gray-600">จัดเก็บและติดตามข้อมูลการอบรมของบุคลากรอย่างมีประสิทธิภาพ</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-gradient-to-r from-blue-400 to-purple-500 text-white p-6 rounded-xl shadow-lg card-hover">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-semibold">จำนวนการอบรมทั้งหมด</h3>
+                            <p class="text-3xl font-bold" id="totalTrainings">0</p>
+                        </div>
+                        <i class="fas fa-book text-4xl opacity-80"></i>
+                    </div>
+                </div>
+                <div class="bg-gradient-to-r from-pink-500 to-orange-400 text-white p-6 rounded-xl shadow-lg card-hover">
+                    <div class="flex items-center justify-between">
+                         <div>
+                            <h3 class="text-lg font-semibold">การอบรมเดือนนี้</h3>
+                            <p class="text-3xl font-bold" id="monthlyTrainings">0</p>
+                        </div>
+                        <i class="fas fa-calendar-alt text-4xl opacity-80"></i>
+                    </div>
+                </div>
+                <div class="bg-gradient-to-r from-green-400 to-teal-500 text-white p-6 rounded-xl shadow-lg card-hover">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-semibold">ผู้เข้าร่วมทั้งหมด</h3>
+                             <p class="text-3xl font-bold" id="totalParticipants">0</p>
+                        </div>
+                        <i class="fas fa-users text-4xl opacity-80"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h3 class="text-xl font-bold text-gray-800 mb-4">
+                    <i class="fas fa-history text-blue-500 mr-2"></i>การอบรมล่าสุด
+                </h3>
+                <div id="recentTrainings" class="space-y-4">
+                    <div class="text-center text-gray-500 py-8">
+                        <i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
+                         <p>กำลังโหลดข้อมูล...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="addFormPage" class="hidden animate-fade-in">
+            <div class="bg-white rounded-xl shadow-lg p-6 md:p-8">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">
+                    <i class="fas fa-plus-circle text-blue-500 mr-2"></i>เพิ่มข้อมูลการอบรม
+                </h2>
+                <form id="trainingForm" class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="fullName" class="block text-sm font-medium text-gray-700 mb-2">ชื่อ-สกุล *</label>
+                            <input type="text" id="fullName" name="fullName" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        <div>
+                            <label for="trainingDate" class="block text-sm font-medium text-gray-700 mb-2">วันที่อบรม *</label>
+                            <input type="text" id="trainingDate" name="trainingDate" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label for="topic" class="block text-sm font-medium text-gray-700 mb-2">เรื่องที่อบรม *</label>
+                        <input type="text" id="topic" name="topic" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="organizer" class="block text-sm font-medium text-gray-700 mb-2">หน่วยงานที่จัด *</label>
+                            <input type="text" id="organizer" name="organizer" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        <div>
+                            <label for="location" class="block text-sm font-medium text-gray-700 mb-2">สถานที่จัดอบรม</label>
+                            <input type="text" id="location" name="location" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">สรุปผลการอบรม</label>
+                        <div id="summaryEditor" style="height: 200px; border-radius: 8px;"></div>
+                    </div>
+                    
+                    <div>
+                        <label for="trainingImages" class="block text-sm font-medium text-gray-700 mb-2">ภาพการอบรม (ไม่เกิน 5 ภาพ)</label>
+                        <input type="file" id="trainingImages" name="trainingImages" multiple accept="image/*" class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                        <div id="imagePreview" class="mt-4 grid grid-cols-2 md:grid-cols-5 gap-4"></div>
+                    </div>
+                    
+                    <div>
+                        <label for="certificate" class="block text-sm font-medium text-gray-700 mb-2">เกียรติบัตร (ถ้ามี)</label>
+                        <input type="file" id="certificate" name="certificate" accept="image/*,application/pdf" class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100">
+                        <div id="certificatePreview" class="mt-4"></div>
+                    </div>
+                    
+                    <div class="flex flex-col sm:flex-row gap-4 pt-4">
+                        <button type="submit" class="btn-gradient text-white px-6 py-3 rounded-lg font-semibold flex-1 flex items-center justify-center gap-2">
+                            <i class="fas fa-save"></i>บันทึกข้อมูล
+                        </button>
+                        <button type="button" onclick="resetForm()" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg font-semibold flex-1 flex items-center justify-center gap-2">
+                            <i class="fas fa-undo"></i>ล้างข้อมูล
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div id="searchPage" class="hidden animate-fade-in">
+            <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">
+                    <i class="fas fa-search text-blue-500 mr-2"></i>ค้นหาข้อมูลการอบรม
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                    <input type="text" id="searchName" placeholder="ค้นหาชื่อ-สกุล" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <input type="text" id="searchTopic" placeholder="ค้นหาเรื่องที่อบรม" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <input type="text" id="searchOrganizer" placeholder="ค้นหาหน่วยงาน" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <button onclick="searchTrainings()" class="btn-success-gradient text-white px-6 py-2 rounded-lg font-semibold flex items-center justify-center gap-2">
+                        <i class="fas fa-search"></i>ค้นหา
+                    </button>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h3 class="text-xl font-bold text-gray-800 mb-4">ผลการค้นหา</h3>
+                <div id="searchResults">
+                    <div class="text-center text-gray-500 py-8">
+                        <i class="fas fa-search text-4xl mb-4 opacity-50"></i>
+                        <p>กรุณาใส่คำค้นหาเพื่อแสดงผลลัพธ์</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="reportPage" class="hidden animate-fade-in">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                     <h3 class="text-xl font-bold text-gray-800 mb-4">
+                        <i class="fas fa-chart-pie text-blue-500 mr-2"></i>สถิติการอบรมตามหน่วยงาน
+                    </h3>
+                    <canvas id="organizerChart"></canvas>
+                </div>
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">
+                        <i class="fas fa-chart-line text-green-500 mr-2"></i>สถิติการอบรมรายเดือน
+                    </h3>
+                    <canvas id="monthlyChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-gray-800 text-white py-6 mt-12">
+        <div class="container mx-auto px-4 text-center">
+            <p class="text-sm">พัฒนาโดย นายจิรายุทธ แสงสิน</p>
+        </div>
+    </footer>
+
+    <script>
+        // --- CONFIGURATION ---
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyTQ4nTr8SINq4q3GM6cp5g8sBCYUaVl9U5f0R2BkzSWf-JcEt1keSAJ4PGHgRULw5H/exec'; // <-- ❗❗❗ ใส่ URL ของ Web App ที่นี่
+
+        // --- GLOBAL VARIABLES ---
+        let trainingData = [];
+        let quillEditor;
+        let organizerChartInstance;
+        let monthlyChartInstance;
+
+        // --- INITIALIZATION ---
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeQuillEditor();
+            initializeDatePicker();
+            initializeFileHandlers();
+            showHome();
+            loadTrainingData();
+        });
+
+        function initializeQuillEditor() {
+            quillEditor = new Quill('#summaryEditor', {
+                theme: 'snow',
+                placeholder: 'กรุณาใส่สรุปผลการอบรม...',
+                modules: {
+                    toolbar: [
+                        ['bold', 'italic', 'underline'],
+                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                        ['clean']
+                    ]
+                }
+            });
+        }
+
+        function initializeDatePicker() {
+            flatpickr("#trainingDate", {
+                locale: "th",
+                dateFormat: "d/m/Y",
+                allowInput: true
+            });
+        }
+        
+        function initializeFileHandlers() {
+            document.getElementById('trainingImages').addEventListener('change', handleImagePreview);
+            document.getElementById('certificate').addEventListener('change', handleCertificatePreview);
+        }
+
+        // --- NAVIGATION & PAGE DISPLAY ---
+        function showHome() {
+            hideAllPages();
+            document.getElementById('homePage').classList.remove('hidden');
+        }
+        
+        function showAddForm() {
+            hideAllPages();
+            document.getElementById('addFormPage').classList.remove('hidden');
+        }
+        
+        function showSearch() {
+            hideAllPages();
+            document.getElementById('searchPage').classList.remove('hidden');
+        }
+        
+        function showReport() {
+            hideAllPages();
+            document.getElementById('reportPage').classList.remove('hidden');
+            renderCharts();
+        }
+        
+        function hideAllPages() {
+            ['homePage', 'addFormPage', 'searchPage', 'reportPage'].forEach(page => {
+                document.getElementById(page).classList.add('hidden');
+            });
+        }
+        
+        function toggleMobileMenu() {
+            document.getElementById('mobileMenu').classList.toggle('hidden');
+        }
+
+        // --- DATA HANDLING & API CALLS ---
+        function loadTrainingData() {
+            // ใช้ JSONP เพื่อดึงข้อมูล
+            const script = document.createElement('script');
+            script.src = `${GOOGLE_SCRIPT_URL}?action=get&callback=handleTrainingDataResponse`;
+            document.head.appendChild(script);
+            script.onload = () => script.remove(); // ลบ script tag หลังโหลดเสร็จ
+        }
+
+        function handleTrainingDataResponse(data) {
+            trainingData = data.map(item => ({
+                ...item,
+                // แปลงค่าจาก Sheet กลับมาเป็นชื่อที่ JavaScript เข้าใจง่าย
+                fullName: item.fullName,
+                trainingDate: item.trainingDate,
+                topic: item.topic,
+                organizer: item.organizer,
+                location: item.location,
+                summary: item.summary,
+                imageUrls: item.imageUrls,
+                certificateUrl: item.certificateUrl,
+            })).sort((a, b) => new Date(b.Timestamp) - new Date(a.Timestamp)); // เรียงลำดับใหม่สุดไปเก่าสุด
+            
+            updateDashboardStats();
+            loadRecentTrainings();
+            if(!document.getElementById('reportPage').classList.contains('hidden')) {
+                renderCharts();
+            }
+        }
+        
+        // --- DASHBOARD & RECENT TRAININGS ---
+        function updateDashboardStats() {
+            const totalTrainings = trainingData.length;
+            const currentMonth = new Date().getMonth();
+            const currentYear = new Date().getFullYear();
+            
+            const monthlyTrainings = trainingData.filter(t => {
+                if (!t.trainingDate) return false;
+                const [day, month, year] = t.trainingDate.split('/');
+                const trainingDate = new Date(`${year}-${month}-${day}`);
+                return trainingDate.getMonth() === currentMonth && trainingDate.getFullYear() === currentYear;
+            }).length;
+
+            document.getElementById('totalTrainings').textContent = totalTrainings;
+            document.getElementById('monthlyTrainings').textContent = monthlyTrainings;
+            document.getElementById('totalParticipants').textContent = totalTrainings; // สมมติว่า 1 การอบรม = 1 คน
+        }
+
+        function loadRecentTrainings() {
+            const container = document.getElementById('recentTrainings');
+            if (trainingData.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center text-gray-500 py-8">
+                        <i class="fas fa-inbox text-4xl mb-4 opacity-50"></i>
+                        <p>ยังไม่มีข้อมูลการอบรม</p>
+                        <button onclick="showAddForm()" class="mt-4 btn-gradient text-white px-4 py-2 rounded-lg">
+                            เพิ่มข้อมูลการอบรมแรก
+                        </button>
+                    </div>`;
+                return;
+            }
+
+            const recent = trainingData.slice(0, 5); // เอา 5 รายการแรก (ที่เรียงลำดับแล้ว)
+            container.innerHTML = recent.map(training => `
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
+                    <div>
+                        <h4 class="font-semibold text-gray-800">${training.fullName || 'ไม่ระบุชื่อ'}</h4>
+                        <p class="text-sm text-gray-600">${training.topic || 'ไม่ระบุหัวข้อ'}</p>
+                    </div>
+                    <div class="text-right text-sm text-gray-500">
+                        <p>${training.trainingDate || 'ไม่ระบุวันที่'}</p>
+                        <p class="font-medium">${training.organizer || 'ไม่ระบุหน่วยงาน'}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // --- FORM HANDLING ---
+        const fileToBase64 = file => new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = error => reject(error);
+        });
+
+        document.getElementById('trainingForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            Swal.fire({
+                title: 'กำลังบันทึกข้อมูล...',
+                text: 'กรุณารอสักครู่',
+                allowOutsideClick: false,
+                didOpen: () => Swal.showLoading()
+            });
+
+            try {
+                const formData = {
+                    fullName: document.getElementById('fullName').value,
+                    trainingDate: document.getElementById('trainingDate').value,
+                    location: document.getElementById('location').value,
+                    organizer: document.getElementById('organizer').value,
+                    topic: document.getElementById('topic').value,
+                    summary: quillEditor.getContents()
+                };
+
+                if (!formData.fullName || !formData.trainingDate || !formData.organizer || !formData.topic) {
+                    throw new Error('กรุณากรอกข้อมูลที่มีเครื่องหมาย * ให้ครบถ้วน');
+                }
+
+                const imageFiles = document.getElementById('trainingImages').files;
+                if (imageFiles.length > 5) {
+                     throw new Error('อัปโหลดรูปภาพได้ไม่เกิน 5 รูป');
+                }
+                
+                const imagePromises = Array.from(imageFiles).map(file => fileToBase64(file).then(base64 => ({ name: file.name, base64 })));
+                const imagePayloads = await Promise.all(imagePromises);
+
+                const certificateFile = document.getElementById('certificate').files[0];
+                let certificatePayload = null;
+                if (certificateFile) {
+                    certificatePayload = { name: certificateFile.name, base64: await fileToBase64(certificateFile) };
+                }
+
+                const payload = { ...formData, trainingImages: imagePayloads, certificate: certificatePayload };
+
+                const response = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify(payload),
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+                });
+
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'บันทึกสำเร็จ!',
+                        text: result.message,
+                        showConfirmButton: false,
+                        timer: 2000
+                    }).then(() => {
+                        resetForm();
+                        showHome();
+                        loadTrainingData();
+                    });
+                } else {
+                    throw new Error(result.message);
+                }
+
+            } catch (error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'เกิดข้อผิดพลาด',
+                    text: error.message || 'ไม่สามารถบันทึกข้อมูลได้'
+                });
+            }
+        });
+
+        function resetForm() {
+            document.getElementById('trainingForm').reset();
+            quillEditor.setContents([]);
+            document.getElementById('imagePreview').innerHTML = '';
+            document.getElementById('certificatePreview').innerHTML = '';
+        }
+
+        // --- FILE PREVIEW ---
+        function handleImagePreview(event) {
+            const files = event.target.files;
+            const previewContainer = document.getElementById('imagePreview');
+            previewContainer.innerHTML = '';
+            
+            if (files.length > 5) {
+                Swal.fire('คำเตือน', 'สามารถอัปโหลดภาพได้ไม่เกิน 5 ภาพ', 'warning');
+                event.target.value = '';
+                return;
+            }
+            
+            Array.from(files).forEach(file => {
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = e => {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.className = 'image-preview border-2 border-gray-200';
+                        previewContainer.appendChild(img);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+        
+        function handleCertificatePreview(event) {
+            const file = event.target.files[0];
+            const previewContainer = document.getElementById('certificatePreview');
+            previewContainer.innerHTML = '';
+            
+            if (!file) return;
+
+            if (file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = e => {
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.className = 'image-preview border-2 border-gray-200';
+                    previewContainer.appendChild(img);
+                };
+                reader.readAsDataURL(file);
+            } else if (file.type === 'application/pdf') {
+                previewContainer.innerHTML = `
+                    <div class="flex items-center p-3 bg-gray-100 rounded-lg">
+                        <i class="fas fa-file-pdf text-red-500 text-3xl mr-3"></i>
+                        <span class="text-sm">${file.name}</span>
+                    </div>`;
+            }
+        }
+
+        // --- SEARCH ---
+        function searchTrainings() {
+            const searchName = document.getElementById('searchName').value.toLowerCase();
+            const searchTopic = document.getElementById('searchTopic').value.toLowerCase();
+            const searchOrganizer = document.getElementById('searchOrganizer').value.toLowerCase();
+            
+            const results = trainingData.filter(t => 
+                (!searchName || (t.fullName && t.fullName.toLowerCase().includes(searchName))) &&
+                (!searchTopic || (t.topic && t.topic.toLowerCase().includes(searchTopic))) &&
+                (!searchOrganizer || (t.organizer && t.organizer.toLowerCase().includes(searchOrganizer)))
+            );
+            
+            displaySearchResults(results);
+        }
+
+        function displaySearchResults(results) {
+            const container = document.getElementById('searchResults');
+            if (results.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center text-gray-500 py-8">
+                        <i class="fas fa-search-minus text-4xl mb-4 opacity-50"></i>
+                        <p>ไม่พบข้อมูลที่ตรงกับการค้นหา</p>
+                    </div>`;
+                return;
+            }
+
+            container.innerHTML = results.map((training, index) => `
+                <div class="border-b border-gray-200 py-4 last:border-b-0">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between">
+                        <div class="flex-1">
+                            <h4 class="font-semibold text-gray-800 text-lg">${training.fullName || ''}</h4>
+                            <p class="text-gray-600 mt-1">${training.topic || ''}</p>
+                            <div class="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-sm text-gray-500">
+                                <span><i class="fas fa-calendar-alt fa-fw mr-1"></i>${training.trainingDate || ''}</span>
+                                <span><i class="fas fa-building fa-fw mr-1"></i>${training.organizer || ''}</span>
+                                ${training.location ? `<span><i class="fas fa-map-marker-alt fa-fw mr-1"></i>${training.location}</span>` : ''}
+                            </div>
+                        </div>
+                        <div class="mt-4 md:mt-0">
+                            <button onclick="viewTrainingDetails('${training.Timestamp}')" class="btn-info-gradient text-white px-4 py-2 rounded-lg text-sm">
+                                <i class="fas fa-eye mr-1"></i>ดูรายละเอียด
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function viewTrainingDetails(timestamp) {
+            const training = trainingData.find(t => t.Timestamp === timestamp);
+            if (!training) return;
+
+            let summaryHtml = '<p><em>ไม่มีข้อมูล</em></p>';
+            if (training.summary) {
+                try {
+                    // สร้าง div ชั่วคราวเพื่อ render Quill delta
+                    const tempDiv = document.createElement('div');
+                    const tempQuill = new Quill(tempDiv, { theme: 'snow' });
+                    // Quill เก็บ delta เป็น stringified JSON ใน Sheet
+                    tempQuill.setContents(JSON.parse(training.summary));
+                    summaryHtml = tempQuill.root.innerHTML;
+                } catch (e) {
+                    summaryHtml = '<p><em>ไม่สามารถแสดงผลสรุปได้</em></p>';
+                }
+            }
+
+            let imagesHtml = '';
+            if (training.imageUrls) {
+                const urls = training.imageUrls.split(', ');
+                imagesHtml = `
+                    <div class="mt-2">
+                        <p><strong>ภาพการอบรม:</strong></p>
+                        <div class="flex flex-wrap gap-2 mt-1">${urls.map(url => `<a href="${url}" target="_blank"><img src="${url}" class="w-24 h-24 object-cover rounded"></a>`).join('')}</div>
+                    </div>`;
+            }
+
+            let certificateHtml = '';
+            if (training.certificateUrl) {
+                certificateHtml = `
+                    <div class="mt-2">
+                        <p><strong>เกียรติบัตร:</strong></p>
+                        <a href="${training.certificateUrl}" target="_blank" class="text-blue-600 hover:underline">คลิกเพื่อดูเกียรติบัตร</a>
+                    </div>`;
+            }
+
+            Swal.fire({
+                title: `<strong class="text-xl">${training.topic || ''}</strong>`,
+                html: `
+                    <div class="text-left space-y-2 text-gray-700">
+                        <p><strong>ผู้เข้าอบรม:</strong> ${training.fullName || 'ไม่ระบุ'}</p>
+                        <p><strong>วันที่:</strong> ${training.trainingDate || 'ไม่ระบุ'}</p>
+                        <p><strong>หน่วยงาน:</strong> ${training.organizer || 'ไม่ระบุ'}</p>
+                        ${training.location ? `<p><strong>สถานที่:</strong> ${training.location}</p>` : ''}
+                        <hr class="my-3">
+                        <p><strong>สรุปผลการอบรม:</strong></p>
+                        <div class="p-2 bg-gray-50 rounded border max-h-40 overflow-y-auto">${summaryHtml}</div>
+                        ${imagesHtml}
+                        ${certificateHtml}
+                    </div>
+                `,
+                width: '600px',
+                confirmButtonText: 'ปิด'
+            });
+        }
+
+        // --- CHARTS & REPORTING ---
+        function renderCharts() {
+            renderOrganizerChart();
+            renderMonthlyChart();
+        }
+
+        function renderOrganizerChart() {
+            const ctx = document.getElementById('organizerChart').getContext('2d');
+            const organizerCounts = trainingData.reduce((acc, t) => {
+                const org = t.organizer || 'ไม่ระบุ';
+                acc[org] = (acc[org] || 0) + 1;
+                return acc;
+            }, {});
+
+            if (organizerChartInstance) organizerChartInstance.destroy();
+            
+            organizerChartInstance = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: Object.keys(organizerCounts).length > 0 ? Object.keys(organizerCounts) : ['ไม่มีข้อมูล'],
+                    datasets: [{
+                        data: Object.keys(organizerCounts).length > 0 ? Object.values(organizerCounts) : [1],
+                        backgroundColor: ['#4BC0C0', '#FF6384', '#FFCE56', '#9966FF', '#36A2EB', '#FF9F40']
+                    }]
+                },
+                options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+            });
+        }
+        
+        function renderMonthlyChart() {
+            const ctx = document.getElementById('monthlyChart').getContext('2d');
+            const months = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+            const monthCounts = Array(12).fill(0);
+            
+            trainingData.forEach(t => {
+                if (!t.trainingDate) return;
+                const [day, month, year] = t.trainingDate.split('/');
+                const date = new Date(`${year}-${month}-${day}`);
+                if (date.getFullYear() === new Date().getFullYear()) {
+                    monthCounts[date.getMonth()]++;
+                }
+            });
+
+            if (monthlyChartInstance) monthlyChartInstance.destroy();
+
+            monthlyChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: months,
+                    datasets: [{
+                        label: 'จำนวนการอบรม',
+                        data: monthCounts,
+                        borderColor: '#36A2EB',
+                        backgroundColor: 'rgba(54, 162, 235, 0.1)',
+                        tension: 0.3,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+                }
+            });
+        }
+
+    </script>
+</body>
+</html>
