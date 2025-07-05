@@ -62,14 +62,16 @@
             filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
         }
         .image-preview {
-            max-width: 100px;
-            max-height: 100px;
+            width: 100px;
+            height: 100px;
             object-fit: cover;
             border-radius: 8px;
+            border: 2px solid #e5e7eb;
         }
     </style>
 </head>
 <body class="bg-slate-50 min-h-screen">
+    <!-- Header -->
     <header class="gradient-bg text-white shadow-lg">
         <div class="container mx-auto px-4 py-4">
             <div class="flex items-center justify-between">
@@ -102,6 +104,7 @@
             </div>
         </div>
         
+        <!-- Mobile Menu -->
         <div id="mobileMenu" class="hidden md:hidden bg-black/20 px-4 pb-4">
             <div class="space-y-2">
                 <button onclick="showHome(); toggleMobileMenu()" class="w-full text-left px-4 py-2 rounded-lg bg-white/20 hover:bg-white/30">
@@ -120,8 +123,10 @@
         </div>
     </header>
 
+    <!-- Main Content -->
     <main class="container mx-auto px-4 py-8">
-        <div id="homePage" class="hidden animate-fade-in">
+        <!-- Home Page -->
+        <div id="homePage" class="animate-fade-in">
             <div class="text-center mb-8">
                 <h2 class="text-3xl font-bold text-gray-800 mb-4">ยินดีต้อนรับสู่ระบบจัดเก็บข้อมูลการอบรม</h2>
                 <p class="text-gray-600">จัดเก็บและติดตามข้อมูลการอบรมของบุคลากรอย่างมีประสิทธิภาพ</p>
@@ -157,6 +162,7 @@
                 </div>
             </div>
             
+            <!-- Recent Trainings -->
             <div class="bg-white rounded-xl shadow-lg p-6">
                 <h3 class="text-xl font-bold text-gray-800 mb-4">
                     <i class="fas fa-history text-blue-500 mr-2"></i>การอบรมล่าสุด
@@ -170,6 +176,7 @@
             </div>
         </div>
 
+        <!-- Add Form Page -->
         <div id="addFormPage" class="hidden animate-fade-in">
             <div class="bg-white rounded-xl shadow-lg p-6 md:p-8">
                 <h2 class="text-2xl font-bold text-gray-800 mb-6">
@@ -211,7 +218,7 @@
                     <div>
                         <label for="trainingImages" class="block text-sm font-medium text-gray-700 mb-2">ภาพการอบรม (ไม่เกิน 5 ภาพ)</label>
                         <input type="file" id="trainingImages" name="trainingImages" multiple accept="image/*" class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
-                        <div id="imagePreview" class="mt-4 grid grid-cols-2 md:grid-cols-5 gap-4"></div>
+                        <div id="imagePreview" class="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4"></div>
                     </div>
                     
                     <div>
@@ -232,6 +239,7 @@
             </div>
         </div>
 
+        <!-- Search Page -->
         <div id="searchPage" class="hidden animate-fade-in">
             <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
                 <h2 class="text-2xl font-bold text-gray-800 mb-6">
@@ -258,6 +266,7 @@
             </div>
         </div>
 
+        <!-- Report Page -->
         <div id="reportPage" class="hidden animate-fade-in">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                 <div class="bg-white rounded-xl shadow-lg p-6">
@@ -276,6 +285,7 @@
         </div>
     </main>
 
+    <!-- Footer -->
     <footer class="bg-gray-800 text-white py-6 mt-12">
         <div class="container mx-auto px-4 text-center">
             <p class="text-sm">พัฒนาโดย นายจิรายุทธ แสงสิน</p>
@@ -360,28 +370,18 @@
             document.getElementById('mobileMenu').classList.toggle('hidden');
         }
 
-        // --- DATA HANDLING & API CALLS ---
+        // --- DATA HANDLING & API CALLS (ฉบับแก้ไข) ---
         function loadTrainingData() {
-            // ใช้ JSONP เพื่อดึงข้อมูล
             const script = document.createElement('script');
-            script.src = `${GOOGLE_SCRIPT_URL}?action=get&callback=handleTrainingDataResponse`;
+            // เพิ่ม timestamp เพื่อป้องกันปัญหา browser cache
+            script.src = `${GOOGLE_SCRIPT_URL}?action=get&callback=handleTrainingDataResponse&t=${new Date().getTime()}`;
             document.head.appendChild(script);
-            script.onload = () => script.remove(); // ลบ script tag หลังโหลดเสร็จ
+            script.onload = () => script.remove();
         }
 
         function handleTrainingDataResponse(data) {
-            trainingData = data.map(item => ({
-                ...item,
-                // แปลงค่าจาก Sheet กลับมาเป็นชื่อที่ JavaScript เข้าใจง่าย
-                fullName: item.fullName,
-                trainingDate: item.trainingDate,
-                topic: item.topic,
-                organizer: item.organizer,
-                location: item.location,
-                summary: item.summary,
-                imageUrls: item.imageUrls,
-                certificateUrl: item.certificateUrl,
-            })).sort((a, b) => new Date(b.Timestamp) - new Date(a.Timestamp)); // เรียงลำดับใหม่สุดไปเก่าสุด
+            // Server ส่งข้อมูลที่ถูกต้องมาให้แล้ว ไม่ต้อง map ซ้ำ
+            trainingData = data.sort((a, b) => new Date(b.Timestamp) - new Date(a.Timestamp));
             
             updateDashboardStats();
             loadRecentTrainings();
@@ -399,13 +399,15 @@
             const monthlyTrainings = trainingData.filter(t => {
                 if (!t.trainingDate) return false;
                 const [day, month, year] = t.trainingDate.split('/');
+                // ตรวจสอบ format ของวันที่ก่อนแปลง
+                if (!day || !month || !year) return false;
                 const trainingDate = new Date(`${year}-${month}-${day}`);
                 return trainingDate.getMonth() === currentMonth && trainingDate.getFullYear() === currentYear;
             }).length;
 
             document.getElementById('totalTrainings').textContent = totalTrainings;
             document.getElementById('monthlyTrainings').textContent = monthlyTrainings;
-            document.getElementById('totalParticipants').textContent = totalTrainings; // สมมติว่า 1 การอบรม = 1 คน
+            document.getElementById('totalParticipants').textContent = totalTrainings;
         }
 
         function loadRecentTrainings() {
@@ -422,7 +424,7 @@
                 return;
             }
 
-            const recent = trainingData.slice(0, 5); // เอา 5 รายการแรก (ที่เรียงลำดับแล้ว)
+            const recent = trainingData.slice(0, 5);
             container.innerHTML = recent.map(training => `
                 <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
                     <div>
@@ -437,7 +439,7 @@
             `).join('');
         }
 
-        // --- FORM HANDLING ---
+        // --- FORM HANDLING (ฉบับแก้ไข) ---
         const fileToBase64 = file => new Promise((resolve, reject) => {
             const reader = new FileReader();
             reader.readAsDataURL(file);
@@ -494,6 +496,15 @@
                 const result = await response.json();
 
                 if (result.status === 'success') {
+                    // เพิ่มข้อมูลใหม่เข้าไปใน array ด้านหน้าสุด (unshift)
+                    if (result.newData) {
+                        trainingData.unshift(result.newData);
+                    }
+                    
+                    // อัปเดตหน้าจอทันทีด้วยข้อมูลล่าสุด
+                    updateDashboardStats();
+                    loadRecentTrainings();
+
                     Swal.fire({
                         icon: 'success',
                         title: 'บันทึกสำเร็จ!',
@@ -503,7 +514,6 @@
                     }).then(() => {
                         resetForm();
                         showHome();
-                        loadTrainingData();
                     });
                 } else {
                     throw new Error(result.message);
@@ -543,7 +553,7 @@
                     reader.onload = e => {
                         const img = document.createElement('img');
                         img.src = e.target.result;
-                        img.className = 'image-preview border-2 border-gray-200';
+                        img.className = 'image-preview';
                         previewContainer.appendChild(img);
                     };
                     reader.readAsDataURL(file);
@@ -563,7 +573,7 @@
                 reader.onload = e => {
                     const img = document.createElement('img');
                     img.src = e.target.result;
-                    img.className = 'image-preview border-2 border-gray-200';
+                    img.className = 'image-preview';
                     previewContainer.appendChild(img);
                 };
                 reader.readAsDataURL(file);
@@ -602,7 +612,7 @@
                 return;
             }
 
-            container.innerHTML = results.map((training, index) => `
+            container.innerHTML = results.map((training) => `
                 <div class="border-b border-gray-200 py-4 last:border-b-0">
                     <div class="flex flex-col md:flex-row md:items-center justify-between">
                         <div class="flex-1">
@@ -629,12 +639,10 @@
             if (!training) return;
 
             let summaryHtml = '<p><em>ไม่มีข้อมูล</em></p>';
-            if (training.summary) {
+            if (training.summary && training.summary !== '""') {
                 try {
-                    // สร้าง div ชั่วคราวเพื่อ render Quill delta
                     const tempDiv = document.createElement('div');
-                    const tempQuill = new Quill(tempDiv, { theme: 'snow' });
-                    // Quill เก็บ delta เป็น stringified JSON ใน Sheet
+                    const tempQuill = new Quill(tempDiv);
                     tempQuill.setContents(JSON.parse(training.summary));
                     summaryHtml = tempQuill.root.innerHTML;
                 } catch (e) {
@@ -644,12 +652,14 @@
 
             let imagesHtml = '';
             if (training.imageUrls) {
-                const urls = training.imageUrls.split(', ');
-                imagesHtml = `
-                    <div class="mt-2">
-                        <p><strong>ภาพการอบรม:</strong></p>
-                        <div class="flex flex-wrap gap-2 mt-1">${urls.map(url => `<a href="${url}" target="_blank"><img src="${url}" class="w-24 h-24 object-cover rounded"></a>`).join('')}</div>
-                    </div>`;
+                const urls = training.imageUrls.split(', ').filter(url => url);
+                if (urls.length > 0) {
+                    imagesHtml = `
+                        <div class="mt-2">
+                            <p><strong>ภาพการอบรม:</strong></p>
+                            <div class="flex flex-wrap gap-2 mt-1">${urls.map(url => `<a href="${url}" target="_blank" rel="noopener noreferrer"><img src="${url}" class="w-24 h-24 object-cover rounded"></a>`).join('')}</div>
+                        </div>`;
+                }
             }
 
             let certificateHtml = '';
@@ -657,7 +667,7 @@
                 certificateHtml = `
                     <div class="mt-2">
                         <p><strong>เกียรติบัตร:</strong></p>
-                        <a href="${training.certificateUrl}" target="_blank" class="text-blue-600 hover:underline">คลิกเพื่อดูเกียรติบัตร</a>
+                        <a href="${training.certificateUrl}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">คลิกเพื่อดูเกียรติบัตร</a>
                     </div>`;
             }
 
@@ -703,7 +713,8 @@
                     labels: Object.keys(organizerCounts).length > 0 ? Object.keys(organizerCounts) : ['ไม่มีข้อมูล'],
                     datasets: [{
                         data: Object.keys(organizerCounts).length > 0 ? Object.values(organizerCounts) : [1],
-                        backgroundColor: ['#4BC0C0', '#FF6384', '#FFCE56', '#9966FF', '#36A2EB', '#FF9F40']
+                        backgroundColor: ['#4BC0C0', '#FF6384', '#FFCE56', '#9966FF', '#36A2EB', '#FF9F40'],
+                        hoverOffset: 4
                     }]
                 },
                 options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
@@ -718,6 +729,7 @@
             trainingData.forEach(t => {
                 if (!t.trainingDate) return;
                 const [day, month, year] = t.trainingDate.split('/');
+                if (!day || !month || !year) return;
                 const date = new Date(`${year}-${month}-${day}`);
                 if (date.getFullYear() === new Date().getFullYear()) {
                     monthCounts[date.getMonth()]++;
