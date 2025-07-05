@@ -294,7 +294,8 @@
 
     <script>
         // --- CONFIGURATION ---
-        const GOOGLE_SCRIPT_URL = 'YOUR_DEPLOYED_WEB_APP_URL'; // <-- ❗❗❗ ใส่ URL ของ Web App ที่นี่
+        // ❗❗❗ สำคัญมาก: ใส่ URL ของ Web App ที่ได้จากการ Deploy ใน Google Apps Script ที่นี่
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyTQ4nTr8SINq4q3GM6cp5g8sBCYUaVl9U5f0R2BkzSWf-JcEt1keSAJ4PGHgRULw5H/exec'; 
 
         // --- GLOBAL VARIABLES ---
         let trainingData = [];
@@ -388,7 +389,7 @@
             }
         }
         
-        // --- DASHBOARD & RECENT TRAININGS (ฉบับแก้ไข) ---
+        // --- DASHBOARD & RECENT TRAININGS ---
         function updateDashboardStats() {
             const totalTrainings = trainingData.length;
             const currentMonth = new Date().getMonth();
@@ -702,7 +703,7 @@
             });
         }
 
-        // --- CHARTS & REPORTING (ฉบับแก้ไข) ---
+        // --- CHARTS & REPORTING ---
         function renderCharts() {
             renderOrganizerChart();
             renderMonthlyChart();
