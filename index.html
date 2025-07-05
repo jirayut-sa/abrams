@@ -647,21 +647,6 @@
             `).join('');
         }
 
-        /**
-         * Helper function to convert Google Drive URL for direct image viewing.
-         * @param {string} url The original Google Drive file viewer URL.
-         * @returns {string} A URL that can be used directly in an <img> src attribute.
-         */
-        function convertGoogleDriveUrl(url) {
-            // Extracts file ID from the standard viewer URL. Google Drive IDs are long alphanumeric strings.
-            const fileIdMatch = url.match(/[-\w]{25,}/);
-            if (fileIdMatch && fileIdMatch[0]) {
-                return `https://drive.google.com/uc?export=view&id=${fileIdMatch[0]}`;
-            }
-            // Return original URL if no ID is found, to avoid breaking other links.
-            return url; 
-        }
-
         function viewTrainingDetails(timestamp) {
             const training = trainingData.find(t => t.Timestamp === timestamp);
             if (!training) return;
@@ -685,10 +670,7 @@
                     imagesHtml = `
                         <div class="mt-2">
                             <p><strong>ภาพการอบรม:</strong></p>
-                            <div class="flex flex-wrap gap-2 mt-1">${urls.map(url => {
-                                const displayUrl = convertGoogleDriveUrl(url);
-                                return `<a href="${url}" target="_blank" rel="noopener noreferrer"><img src="${displayUrl}" class="w-24 h-24 object-cover rounded" alt="ภาพการอบรม"></a>`;
-                            }).join('')}</div>
+                            <div class="flex flex-wrap gap-2 mt-1">${urls.map(url => `<a href="${url}" target="_blank" rel="noopener noreferrer"><img src="${url}" class="w-24 h-24 object-cover rounded"></a>`).join('')}</div>
                         </div>`;
                 }
             }
