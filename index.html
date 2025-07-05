@@ -294,7 +294,7 @@
 
     <script>
         // --- CONFIGURATION ---
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyTQ4nTr8SINq4q3GM6cp5g8sBCYUaVl9U5f0R2BkzSWf-JcEt1keSAJ4PGHgRULw5H/exec'; // <-- ❗❗❗ ใส่ URL ของ Web App ที่นี่
+        const GOOGLE_SCRIPT_URL = 'YOUR_DEPLOYED_WEB_APP_URL'; // <-- ❗❗❗ ใส่ URL ของ Web App ที่นี่
 
         // --- GLOBAL VARIABLES ---
         let trainingData = [];
@@ -370,17 +370,15 @@
             document.getElementById('mobileMenu').classList.toggle('hidden');
         }
 
-        // --- DATA HANDLING & API CALLS (ฉบับแก้ไข) ---
+        // --- DATA HANDLING & API CALLS ---
         function loadTrainingData() {
             const script = document.createElement('script');
-            // เพิ่ม timestamp เพื่อป้องกันปัญหา browser cache
             script.src = `${GOOGLE_SCRIPT_URL}?action=get&callback=handleTrainingDataResponse&t=${new Date().getTime()}`;
             document.head.appendChild(script);
             script.onload = () => script.remove();
         }
 
         function handleTrainingDataResponse(data) {
-            // Server ส่งข้อมูลที่ถูกต้องมาให้แล้ว ไม่ต้อง map ซ้ำ
             trainingData = data.sort((a, b) => new Date(b.Timestamp) - new Date(a.Timestamp));
             
             updateDashboardStats();
@@ -390,7 +388,7 @@
             }
         }
         
-        // --- DASHBOARD & RECENT TRAININGS ---
+        // --- DASHBOARD & RECENT TRAININGS (ฉบับแก้ไข) ---
         function updateDashboardStats() {
             const totalTrainings = trainingData.length;
             const currentMonth = new Date().getMonth();
@@ -398,10 +396,25 @@
             
             const monthlyTrainings = trainingData.filter(t => {
                 if (!t.trainingDate) return false;
-                const [day, month, year] = t.trainingDate.split('/');
-                // ตรวจสอบ format ของวันที่ก่อนแปลง
-                if (!day || !month || !year) return false;
-                const trainingDate = new Date(`${year}-${month}-${day}`);
+                
+                const parts = t.trainingDate.split('/');
+                if (parts.length !== 3) return false;
+                
+                let [day, month, year] = parts;
+                
+                // Convert Buddhist year to Gregorian year
+                let numericYear = parseInt(year, 10);
+                if (numericYear > 2500) { // Simple check for Buddhist year
+                    numericYear -= 543;
+                }
+
+                // Create date object using 0-indexed month for accuracy
+                const trainingDate = new Date(numericYear, parseInt(month, 10) - 1, parseInt(day, 10));
+                
+                if (isNaN(trainingDate.getTime())) {
+                    return false; // Invalid date
+                }
+
                 return trainingDate.getMonth() === currentMonth && trainingDate.getFullYear() === currentYear;
             }).length;
 
@@ -439,7 +452,7 @@
             `).join('');
         }
 
-        // --- FORM HANDLING (ฉบับแก้ไข) ---
+        // --- FORM HANDLING ---
         const fileToBase64 = file => new Promise((resolve, reject) => {
             const reader = new FileReader();
             reader.readAsDataURL(file);
@@ -496,12 +509,10 @@
                 const result = await response.json();
 
                 if (result.status === 'success') {
-                    // เพิ่มข้อมูลใหม่เข้าไปใน array ด้านหน้าสุด (unshift)
                     if (result.newData) {
                         trainingData.unshift(result.newData);
                     }
                     
-                    // อัปเดตหน้าจอทันทีด้วยข้อมูลล่าสุด
                     updateDashboardStats();
                     loadRecentTrainings();
 
@@ -691,7 +702,7 @@
             });
         }
 
-        // --- CHARTS & REPORTING ---
+        // --- CHARTS & REPORTING (ฉบับแก้ไข) ---
         function renderCharts() {
             renderOrganizerChart();
             renderMonthlyChart();
@@ -725,14 +736,27 @@
             const ctx = document.getElementById('monthlyChart').getContext('2d');
             const months = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
             const monthCounts = Array(12).fill(0);
+            const currentGregorianYear = new Date().getFullYear();
             
             trainingData.forEach(t => {
                 if (!t.trainingDate) return;
-                const [day, month, year] = t.trainingDate.split('/');
-                if (!day || !month || !year) return;
-                const date = new Date(`${year}-${month}-${day}`);
-                if (date.getFullYear() === new Date().getFullYear()) {
-                    monthCounts[date.getMonth()]++;
+                
+                const parts = t.trainingDate.split('/');
+                if (parts.length !== 3) return;
+
+                let [day, month, year] = parts;
+
+                let numericYear = parseInt(year, 10);
+                if (numericYear > 2500) { // Simple check for Buddhist year
+                    numericYear -= 543;
+                }
+
+                // Only count for the current Gregorian year
+                if (numericYear === currentGregorianYear) {
+                    const monthIndex = parseInt(month, 10) - 1;
+                    if (monthIndex >= 0 && monthIndex < 12) {
+                        monthCounts[monthIndex]++;
+                    }
                 }
             });
 
